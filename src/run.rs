@@ -1,6 +1,9 @@
 use console::style;
-use std::collections::HashMap;
-use json;
+use reqwest;
+use std::fs::File;
+use std::io::{self, BufRead};
+use std::path::Path;
+use serde_json;
 pub async fn init() {
     if auth("asdf", "asdf") && proxy_connect("abc", "prxy") {
         start().await;
@@ -22,19 +25,23 @@ fn proxy_connect(ip: &str, port: &str) -> bool {
         return true;
     }
 }
-
-async fn start() {
-    println!("\n\n{}\n\n", style("Started Cracking").red().bold());
-    let map = "";
-    let client = reqwest::Client::new();
-    let res = client
-        .post("authserver.mojang.com/authenticate")
-        .json(&map)
+async fn start() -> Result<(), reqwest::Error> {
+    println!("\n\n{}\n\n", style("Started Checking").red().bold());
+    let echo_json: serde_json::Value = reqwest::Client::new()
+        .post("https://authserver.mojang.com/authenticate")
+        .json(&serde_json::json!({
+            "agent": {
+                "name": "Minecraft",
+                "version": 1
+            },
+            "username": "smth",
+            "password": "smth"
+        }))
         .send()
-        .await;
+        .await?
+        .json()
+        .await?;
 
-    match res {
-        Ok(r) => println!("HELP {:?}", r),
-        Err(e) => println!("{}", e),
-    }
+    println!("{:#?}", echo_json);
+    Ok(())
 }
