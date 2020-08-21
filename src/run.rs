@@ -29,9 +29,7 @@ fn proxy_connect(ip: &str, port: &str) -> bool {
 }
 async fn start() -> Result<(), reqwest::Error> {
     println!("\n\n{}\n\n", style("Started Checking").red().bold());
-    if let Ok(vec) = read() {
-        for combo in vec {}
-    }
+    read();
     Ok(())
 }
 
@@ -40,33 +38,29 @@ where
     P: AsRef<Path>,
 {
     let file = File::open(filename)?;
+    
     Ok(io::BufReader::new(file).lines())
 }
-fn read() -> Result<Vec<Vec<String>>, &'static str> {
-    if let Ok(lines) = read_lines("./alts.txt") {
-        print!("Ok!");
-        let mut accs: Vec<Vec<String>> = Vec::new();
+async fn read(){
+    let mut accs: Vec<Vec<String>> = Vec::new();
+    if let Ok(lines) = read_lines("alts.txt") {
+        println!("Ok!");
+        
         for line in lines {
             if let Ok(combo) = line {
                 let res: Vec<String> = combo.split(":").map(|s| s.to_string()).collect();
-                accs.push(res);
+                &accs.push(res);
             }
         }
-        return Ok(accs);
+        request(accs);
     } else {
-        println!(
-            "{}",
-            style(
-                "Failed to read file. Please make sure that the file is correctly named (alts.txt)"
-            )
-            .red()
-        );
-        Err("Failed")
     }
+    
+    
 }
-async fn request(thing: Vec<Vec<String>>) -> Result<String, reqwest::Error> {
+async fn request(thing: Vec<Vec<String>>) -> Result<&'static str, reqwest::Error> {
     let mut results: Vec<String> = Vec::new();
-
+    println!("in the req function");
     for combo in thing {
         let echo_json = reqwest::Client::new()
             .post("https://authserver.mojang.com/authenticate")
@@ -82,29 +76,9 @@ async fn request(thing: Vec<Vec<String>>) -> Result<String, reqwest::Error> {
             .await?
             .json()
             .await?;
+        results.push(echo_json);
     }
-    deal(results);
-    Ok("mmmm".to_string())
-}
-
-fn deal(json: Vec<String>) -> Result<String, String> {
-    let mut v: Option<Result<String, serde_json::error::Error>> = None;
-    for error in json {
-        let err: &str = &error.to_owned()[..];
-        v = Some(serde_json::from_str(err));
-    }
-    if let Some(actual_v) = v {
-        match actual_v {
-            Err(error) => {
-                println!("{}", error);
-                Err("whoops".to_string())
-            }
-            Ok(a) => {
-                println!("{}", a);
-                Ok("sike".to_string())
-            }
-        }
-    } else {
-        Err("there was an error!".to_string())
-    }
+    println!("Smthing");
+    println!("{:?}", results);
+    Ok("idk")
 }
