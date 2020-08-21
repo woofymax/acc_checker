@@ -52,7 +52,10 @@ async fn read(){
                 &accs.push(res);
             }
         }
-        request(accs);
+        match request(accs) {
+            Err(error) => println!("{:?}", error)
+
+        }
     } else {
     }
     
