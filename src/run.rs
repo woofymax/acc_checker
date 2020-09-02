@@ -9,7 +9,7 @@ use std::process::Command;
 pub async fn init() {
     if auth("asdf", "asdf") && proxy_connect("abc", "prxy") {
         start().await;
-    }
+    } 
 }
 
 fn auth(user: &str, pass: &str) -> bool {
@@ -44,7 +44,7 @@ where
 async fn read(){
     let mut accs: Vec<Vec<String>> = Vec::new();
     if let Ok(lines) = read_lines("alts.txt") {
-        println!("Ok!");
+        println!("Ok reading file");
         
         for line in lines {
             if let Ok(combo) = line {
@@ -52,19 +52,15 @@ async fn read(){
                 &accs.push(res);
             }
         }
-        match request(accs) {
-            Err(error) => println!("{:?}", error)
-
-        }
-    } else {
+    
     }
     
     
 }
-async fn request(thing: Vec<Vec<String>>) -> Result<&'static str, reqwest::Error> {
+async fn request(creds: Vec<Vec<String>>) -> Result<&'static str, reqwest::Error> {
     let mut results: Vec<String> = Vec::new();
     println!("in the req function");
-    for combo in thing {
+    for combo in creds {
         let echo_json = reqwest::Client::new()
             .post("https://authserver.mojang.com/authenticate")
             .json(&serde_json::json!({
@@ -81,7 +77,5 @@ async fn request(thing: Vec<Vec<String>>) -> Result<&'static str, reqwest::Error
             .await?;
         results.push(echo_json);
     }
-    println!("Smthing");
-    println!("{:?}", results);
-    Ok("idk")
+    Ok("something")
 }
